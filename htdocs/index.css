@@ -1,0 +1,81 @@
+h2,h3 {
+    margin: 0;
+}
+
+/* Objet (Ingredient/Produit) */
+span.FGItem
+, span.FGItemDescriptor
+, span.FGItemDescriptorBiomass
+, span.FGConsumableDescriptor
+, span.FGItemDescriptorNuclearFuel
+, span.FGItemDescAmmoTypeProjectile
+, span.FGItemDescAmmoTypeColorCartridge
+, span.FGEquipmentDescriptor
+, span.FGItemDescAmmoTypeInstantHit
+, span.FGAmmoTypeProjectile
+, span.FGAmmoTypeInstantHit
+, span.FGAmmoTypeSpreadshot {
+    color: #000000;
+}
+
+/* Ressource naturelle exploitable */
+span.FGResourceDescriptor {
+	/* Element naturelle : Extration automatisable */
+    /*font-weight: bold;*/
+}
+
+span.RF_INVALID {
+	/* Element qui n'en est pas un... */
+    color: #FF0000; /*ERROR - Un ingredient doit etre dans un etat connu (solid, liquid, gas)*/
+}
+
+span.RF_LIQUID,
+span.RF_GAS {
+	/* Element dans un etat liquide/gazeuse */
+    color: #004080;
+}
+
+span.RF_SOLID {
+	/* Element dans un etat solide */
+    color: #000000;
+}
+
+span.Radioactive {
+	/* Element radioactif */
+	/*text-shadow: 0em 0em 0.5em #ffff00;*/
+}
+
+span.SrcPickUp {
+	/* Element naturelle : Recolte manuelle uniquement */
+    color: #505050;
+}
+
+span.FGRecipe {
+	/* Recette */
+    /*font-weight: bold;*/
+    color: #404000;
+}
+
+/* Batiment (Extraction/Production) */
+span.FGBuilding
+,span.FGBuildableResourceExtractor
+, span.FGBuildableManufacturer
+, span.FGBuildableManufacturerVariablePower
+, span.FGBuildableGeneratorFuel
+, span.FGBuildableGeneratorNuclear
+, span.FGBuildableGeneratorGeoThermal
+, span.FGBuildableWaterPump
+, span.FGBuildableFrackingExtractor {
+    font-weight: bold;
+    color: #000000;
+}
+
+/* Unlocker - Recipe */
+span.FGSchematic {
+    /*font-weight: bold;*/
+    color: #804000;
+}
+
+fieldset {
+    background-color: #ffffff20;
+}
