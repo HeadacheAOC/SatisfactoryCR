@@ -1,5 +1,9 @@
+body {
+	background-color: #999999;
+}
+
 h2,h3 {
-    margin: 0;
+	margin: 0;
 }
 
 /* Objet (Ingredient/Produit) */
@@ -15,29 +19,29 @@ span.FGItem
 , span.FGAmmoTypeProjectile
 , span.FGAmmoTypeInstantHit
 , span.FGAmmoTypeSpreadshot {
-    color: #000000;
+	color: #000000;
 }
 
 /* Ressource naturelle exploitable */
 span.FGResourceDescriptor {
 	/* Element naturelle : Extration automatisable */
-    /*font-weight: bold;*/
+	/*font-weight: bold;*/
 }
 
 span.RF_INVALID {
 	/* Element qui n'en est pas un... */
-    color: #FF0000; /*ERROR - Un ingredient doit etre dans un etat connu (solid, liquid, gas)*/
+	color: #FF0000; /*ERROR - Un ingredient doit etre dans un etat connu (solid, liquid, gas)*/
 }
 
 span.RF_LIQUID,
 span.RF_GAS {
 	/* Element dans un etat liquide/gazeuse */
-    color: #004080;
+	color: #004080;
 }
 
 span.RF_SOLID {
 	/* Element dans un etat solide */
-    color: #000000;
+	color: #000000;
 }
 
 span.Radioactive {
@@ -47,13 +51,13 @@ span.Radioactive {
 
 span.SrcPickUp {
 	/* Element naturelle : Recolte manuelle uniquement */
-    color: #505050;
+	color: #505050;
 }
 
 span.FGRecipe {
 	/* Recette */
-    /*font-weight: bold;*/
-    color: #404000;
+	/*font-weight: bold;*/
+	color: #404000;
 }
 
 /* Batiment (Extraction/Production) */
@@ -66,16 +70,34 @@ span.FGBuilding
 , span.FGBuildableGeneratorGeoThermal
 , span.FGBuildableWaterPump
 , span.FGBuildableFrackingExtractor {
-    font-weight: bold;
-    color: #000000;
+	font-weight: bold;
+	color: #000000;
 }
 
 /* Unlocker - Recipe */
 span.FGSchematic {
-    /*font-weight: bold;*/
-    color: #804000;
+	/*font-weight: bold;*/
+	color: #804000;
 }
 
 fieldset {
-    background-color: #ffffff20;
+	background-color: #ffffff20;
+}
+
+.tooltip .tooltiptext {
+	position: absolute;
+	visibility: hidden;
+
+	width: 800px;
+	padding:1em;
+	border-style: double;
+
+	background-color: #888888;
+	color: #000000;
+	font-size: 0.8em;
+	font-weight: normal;
+}
+
+.tooltip:hover .tooltiptext {
+	visibility: visible;
 }
