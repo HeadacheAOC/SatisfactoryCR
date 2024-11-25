@@ -5,11 +5,11 @@ use Exception;
 
 class FGRecipe extends FGElement
 {
-	public string $FullName = '';
-	public array $mIngredients = array();
-	public array $mProduct = array();
+	private string $FullName = '';
+	private array $mIngredients = array();
+	private array $mProduct = array();
 	private float $mManufactoringDuration = 0;
-	public array $mProducedIn = array();
+	private array $mProducedIn = array();
 
 	function __toString2(int $format=0) {
 		$str = parent::__toString2($format);
@@ -68,7 +68,7 @@ class FGRecipe extends FGElement
 			$str .= '&#10;PRODUCEIN - '.htmlspecialchars(implode(', ', $lst));
 
 			// Cycle
-			$str .= '&#10;CYCLE - '.htmlspecialchars($this->mManufactoringDuration .'s ('.$this->getCyclesPM().'pm)');
+			$str .= '&#10;CYCLE - '.htmlspecialchars($this->mManufactoringDuration .'s ('.$this->getCyclePM().'pm)');
 
 			// HR
 			$str .= '&#10;';
@@ -104,7 +104,7 @@ class FGRecipe extends FGElement
 			}
 			$str .= implode(', ', $lst);
 
-			$str .= ' <= '.$this->mManufactoringDuration .'s ('.$this->getCyclesPM().'pm) <= ';
+			$str .= ' <= '.$this->mManufactoringDuration .'s ('.$this->getCyclePM().'pm) <= ';
 
 			$lst = array();
 			foreach ($this->mIngredients as $className => $amount) {
@@ -149,7 +149,7 @@ class FGRecipe extends FGElement
 
 					$classNames = array();
 					foreach($matches['BlueprintClassName'] as $k => $bpClassName) {
-						$classNames[$k] = FGElement::convBPCNtoClassName($bpClassName);
+						$classNames[$k] = FGElement::extractClassNameFromBPCN($bpClassName);
 					}
 
 					$amounts = array();
@@ -167,7 +167,7 @@ class FGRecipe extends FGElement
 
 					$classNames = array();
 					foreach($matches['BlueprintClassName'] as $k => $bpClassName) {
-						$classNames[$k] = FGElement::convBPCNtoClassName($bpClassName);
+						$classNames[$k] = FGElement::extractClassNameFromBPCN($bpClassName);
 					}
 
 					$amounts = array();
@@ -186,7 +186,7 @@ class FGRecipe extends FGElement
 					$varvalue_AsArray = preg_split('/[,\(\)"]/', $varvalue, -1, PREG_SPLIT_NO_EMPTY);
 					$classNames = array();
 					foreach($varvalue_AsArray as $bpClassName) {
-						$classNames[] = FGElement::convBPCNtoClassName($bpClassName);
+						$classNames[] = FGElement::extractClassNameFromBPCN($bpClassName);
 					}
 					$recipe->mProducedIn = $classNames;
 					break;
@@ -196,136 +196,16 @@ class FGRecipe extends FGElement
 		return $recipe;
 	}
 
-	/**
-	 * Generer les recettes induites par le batiment.
-	 * Concerne principalement les batiments de type generateur ou extracteur.
-	 * @param FGBuilding $building
-	 * @param array $items
-	 * @throws Exception
-	 * @return array
-	 */
-	static function parseFromBuilding(FGBuilding $building, array &$items): array {
-		/* @var $item FGItem */
-		/* @var $ingredient FGItem */
-		/* @var $waste FGItem */
-		/* @var $product FGItem */
-
-		$recipes = array();
-		$NativeClass = "/Script/CoreUObject.Class'/Script/FactoryGame.FGRecipe'";
-
-		if ($building->isItemExtractor()) {
-
-			// Lister les ressources extractables par ce bâtiment
-			$products = array();
-			if ($building->mOnlyAllowCertainResources) {
-				$products = array();
-				foreach($building->mAllowedResources as $productClassName) {
-					$products[] = $items[$productClassName];
-				}
-			} else {
-				foreach($items as $item) {
-					if (!$item->isRawRessource()) continue;
-					if (!in_array($item->getForm(), $building->mAllowedResourceForms)) continue;
-					$products[] = $item;
-				}
-			}
-
-			// Créer une recette pour chaque ressources
-			foreach($products as $product) {
-
-				$purityBonus = 1; // array('Impure'=>0.5, ''=>1, 'Pure'=>2)
-				$recipe = self::parse($NativeClass, (object) array());
-
-				// Bâtiment
-				$recipe->mProducedIn = array($building->getClassName());
-
-				// Cycle
-				$recipe->mManufactoringDuration = $building->mExtractCycleTime;
-
-				// Consommation
-				$recipe->mIngredients = array();
-
-				// Production
-				$recipe->mProduct[$product->getClassName()] = $building->mItemsPerCycle*$purityBonus;
-
-				// Description
-				self::setPseudoIdentity($recipe, $building, $items);
-
-				$recipes[] = $recipe;
-			}
-
-
-		} elseif ($building->isPowerGenerator()) {
-			if (!empty($building->mFuel)) {
-				if (!is_array($building->mFuel)) throw new Exception();
-
-				foreach($building->mFuel as $fuel) {
-
-					// Lister les carburants compatibles avec ce générateur
-					$lstIngredientFuel = array();
-					$mFuelClass = $fuel['mFuelClass'];
-					if ('FGItem' == substr($mFuelClass, 0, 6)) { // FGItemDescriptorBiomass
-						// Cas où un groupe d'ingrédients est désigné
-						foreach($items as $item) {
-							if (false!==strpos($item->getNativeClass(), $mFuelClass)) {
-								if ($building->mFuelResourceForm != $item->getForm()) continue;
-								if (empty($item->getFuelEnergy())) continue;
-								$lstIngredientFuel[] = $item;
-							}
-						}
-					} else {
-						// Cas où un unique ingrédient est désigné
-						$lstIngredientFuel[] = $items[$fuel['mFuelClass']];
-					}
-
-					// Créer une recette pour chaque carburant
-					foreach($lstIngredientFuel as $ingredient) {
-						$recipe = self::parse($NativeClass, (object) array());
-
-						// Bâtiment
-						$recipe->mProducedIn = array($building->getClassName());
-
-						// Cycle
-						$recipe->mManufactoringDuration = ($building->mFuelLoadAmount * $ingredient->getFuelEnergy()) / $building->mPowerProduction;
-
-						// Consommation
-						$recipe->mIngredients = array();
-						$recipe->mIngredients[$ingredient->getClassName()] = $building->mFuelLoadAmount;
-						if ($building->mRequiresSupplementalResource) {
-							$ingredientSupplemental = $items[$fuel['mSupplementalResourceClass']];
-							$recipe->mIngredients[$ingredientSupplemental->getClassName()] = $building->mSupplementalToPowerRatio * $ingredient->getFuelEnergy();
-						}
-
-						// Production
-						if ($ingredient->wasteProduction()>0) {
-							$recipe->mProduct[$ingredient->getWasteClassName()] = $building->mFuelLoadAmount * $ingredient->wasteProduction();
-							$waste = $items[$ingredient->getWasteClassName()];
-							//$DisplayName = $waste->getDisplayName(); // "Plutonium Waste"
-						}
-
-						// Description
-						self::setPseudoIdentity($recipe, $building, $items);
-
-						$recipes[] = $recipe;
-					}
-				}
-			}
-		}
-		return $recipes;
-	}
-
-	private static function setPseudoIdentity(FGRecipe $recipe, FGBuilding $building, array &$items) {
+	public static function setPseudoIdentity(FGRecipe $recipe, FGBuilding $building, array &$items, ?String $DisplayNameSuffixe=null) {
 		/* @var FGItem $primaryItem */
 		$buildingType = null;
 		$primaryItem = null;
-		$DisplayNameSuffixe = null;
-		if ($building->isItemExtractor()) {
+		if ($building->isResourceExtractor()) {
 			$buildingType = 'Extractor';
 			$primaryItem = $items[array_key_first($recipe->mProduct)];
 			$primaryItemPM = $recipe->getProductPM($primaryItem->getClassName());
 			$primaryItemAmount = $recipe->mProduct[$primaryItem->getClassName()];
 			$DisplayNamePrefix = $building->getDisplayName();
-			$DisplayNameSuffixe = null;
 		} elseif ($building->isPowerGenerator()) {
 			$buildingType = 'Generator';
 			$primaryItem = $items[array_key_first($recipe->mIngredients)];
@@ -339,21 +219,48 @@ class FGRecipe extends FGElement
 			$primaryItemPM = $recipe->getProductPM($primaryItem->getClassName());
 			$primaryItemAmount = $recipe->mProduct[$primaryItem->getClassName()];
 			$DisplayNamePrefix = $building->getDisplayName();
-			$DisplayNameSuffixe = null;
 		}
 
 		 // "Plutonium Fuel Rod Power"
-		if (empty($recipe->mDisplayName)) $recipe->mDisplayName = (!empty($DisplayNamePrefix) ? "{$DisplayNamePrefix}: " : '') . $primaryItem->getDisplayName() . (!empty($DisplayNameSuffixe) ? " {$DisplayNameSuffixe}" : '');
+		if (empty($recipe->mDisplayName)) {
+			$foo = array();
+			if (!empty($DisplayNamePrefix)) $foo[] = "{$DisplayNamePrefix}:";
+			$foo[] = $primaryItem->getDisplayName();
+			if (!empty($DisplayNameSuffixe)) $foo[] = $DisplayNameSuffixe;
+			
+			$recipe->mDisplayName = implode(' ', $foo);
+		}
+		
+		// "ClassName": "Recipe_SteelBeam",
+		// "ClassName": "Recipe_Caterium_Copper",
+		// "ClassName": "Recipe_SAMFluctuator",
+		$ClassName = array();
+		$ClassName[] = 'Recipe';
+		$ClassName[] = $building->getShortName();
+		$ClassName[] = $primaryItem->getName();
+		if (!empty($DisplayNameSuffixe)) $ClassName[] = $DisplayNameSuffixe;
+		$ClassName = implode('_', $ClassName);
 
 		// "ClassName": "Recipe_SteelBeam_C",
 		// "ClassName": "Recipe_Caterium_Copper_C",
 		// "ClassName": "Recipe_SAMFluctuator_C",
-		if (empty($recipe->ClassName)) $recipe->ClassName = "Recipe_{$building->getShortName()}_{$primaryItem->getName()}";
+		if (empty($recipe->ClassName)) {
+			$recipe->ClassName = "{$ClassName}_C";
+		}
 
 		// "FullName": "BlueprintGeneratedClass /Game/FactoryGame/Recipes/Constructor/Recipe_SteelBeam.Recipe_SteelBeam_C",
 		// "FullName": "BlueprintGeneratedClass /Game/FactoryGame/Recipes/Converter/ResourceConversion/Recipe_Caterium_Copper.Recipe_Caterium_Copper_C",
 		// "FullName": "BlueprintGeneratedClass /Game/FactoryGame/Recipes/Assembler/Recipe_SAMFluctuator.Recipe_SAMFluctuator_C",
-		if (empty($recipe->FullName)) $recipe->FullName = "BlueprintGeneratedClass /Game/FactoryGame/Recipes/{$buildingType}/{$recipe->ClassName}";
+		if (empty($recipe->FullName)) {
+			$foo = array();
+			$foo[] = 'BlueprintGeneratedClass /Game/FactoryGame/Recipes';
+			$foo[] = $buildingType;
+			$foo[] = "{$ClassName}.{$recipe->ClassName}";
+			
+			$ClassName = array();
+			
+			$recipe->FullName = implode('/', $foo);
+		}
 
 	}
 
@@ -385,28 +292,89 @@ class FGRecipe extends FGElement
 		}
 
 	}
+	
+	/**
+	 * Definir la liste des ingredients consommes par cycle
+	 * @param array $items
+	 */
+	function setIngredients(array $items) {
+	    $this->mIngredients = $items;
+	}
+	
+	/**
+	 * Obtenir la liste des ingredients consommes par cycle
+	 * @return array
+	 */
+	function getIngredients(): array {
+	    return $this->mIngredients;
+	}
+	
+	/**
+	 * Definir la liste des elements produits par cycle
+	 * @param array $items
+	 */
+	function setProducts(array $items) {
+	    $this->mProduct = $items;
+	}
+	
+	/**
+	 * Obtenir la liste des elements produits par cycle
+	 * @return array
+	 */
+	function getProducts(): array {
+	    return $this->mProduct;
+	}
+	
+	/**
+	 * Definir la liste des batiments dans lesquels cette recette peut etre mise en oeuvre.
+	 * @param array $buildings
+	 */
+	function setProducedIn(array $buildings) {
+	    $this->mProducedIn = $buildings;
+	}
+	
+	/**
+	 * Obtenir la liste des batiments dans lesquels cette recette peut etre mise en oeuvre.
+	 * @return array
+	 */
+	function getProducedIn(): array {
+	    return $this->mProducedIn;
+	}
+	
+	/**
+	 * Definir le nombre de Tick de production par minute
+	 * @param float $value
+	 */
+	function setCyclePM(float $value) {
+		$this->mManufactoringDuration = 60/$value;
+	}
 
 	/**
 	 * Obtenir le nombre de Tick de production par minute
+	 * @return float
 	 */
-	function getCyclesPM(): float {
+	function getCyclePM(): float {
 		return 60/$this->mManufactoringDuration;
 	}
 
 	/**
 	 * Obtenir le nombre d'exemplaire produit par minute
+	 * @param string $itemClassName ClassName du produit
+	 * @return float
 	 */
-	function getProductPM(string $itemClassName): float {
-		$amount = $this->mProduct[$itemClassName] ?? 0;
-		return $amount * $this->getCyclesPM();
+	function getProductPM(string $ClassName): float {
+		$amount = $this->mProduct[$ClassName] ?? 0;
+		return $amount * $this->getCyclePM();
 	}
 
 	/**
 	 * Obtenir le nombre d'exemplaire consomme par minute
+	 * @param string $itemClassName ClassName de l'ingredient
+	 * @return float
 	 */
-	function getIngredientPM(string $itemClassName): float {
-		$amount = $this->mIngredients[$itemClassName] ?? 0;
-		return $amount * $this->getCyclesPM();
+	function getIngredientPM(string $ClassName): float {
+		$amount = $this->mIngredients[$ClassName] ?? 0;
+		return $amount * $this->getCyclePM();
 	}
 
 	/**

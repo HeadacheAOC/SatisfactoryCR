@@ -11,32 +11,27 @@ abstract class FGElement
 	///// geres par la fonction __toString2().
 
 	/**
-	 * (CSV) Comma-Separated Values.
-	 * @var integer
+	 * @var int (CSV) Comma-Separated Values.
 	 */
 	public const TS_CSV = 0;
 
 	/**
-	 * (JSON) Encoder avec json_encode()
-	 * @var int
+	 * @var int (JSON) Encoder avec json_encode()
 	 */
 	public const TS_JSON = 1;
 
 	/**
-	 * (HTML) A destination du contenu d'une balise HTML de type inline (ex: SPAN).
-	 * @var int
+	 * @var int (HTML) A destination du contenu d'une balise HTML de type inline (ex: SPAN).
 	 */
 	public const TS_HTML_INNERTAG = 2;
 
 	/**
-	 * (HTML) A destination de l'attribut TITLE d'une balise HTML.
-	 * @var int
+	 * @var int (HTML) A destination de l'attribut TITLE d'une balise HTML.
 	 */
 	public const TS_HTML_TAGATTR_TITLE = 3;
 
 	/**
-	 * (HTML) A destination du contenu d'une balise HTML de type block (ex DIV).
-	 * @var int
+	 * @var int (HTML) A destination du contenu d'une balise HTML de type block (ex DIV).
 	 */
 	public const TS_HTML_BLOCKTAG = 4;
 
@@ -46,32 +41,27 @@ abstract class FGElement
 	///// Definition de l'objet
 
 	/**
-	 * Source - Definition de l'objet. Provient du jeux Satisfactory.
-	 * @var object
+	 * @var object Source - Definition de l'objet. Provient directement du fichier JSON mis a la disposition de la communaute par Satisfactory.
 	 */
 	private ?object $srcData;
 
 	/**
-	 * 2024/05/04 Exemple - /Script/CoreUObject.Class'/Script/FactoryGame.FGItemDescriptor'
-	 * @var string
+	 * @var string 2024/05/04 Exemple - /Script/CoreUObject.Class'/Script/FactoryGame.FGItemDescriptor'
 	 */
 	protected string $NativeClass;
 
 	/**
-	 * 2024/05/04 Exemple - Desc_NuclearWaste_C
-	 * @var string
+	 * @var string 2024/05/04 Exemple - Desc_NuclearWaste_C
 	 */
 	protected string $ClassName = '';
 
 	/**
-	 * 2024/05/04 Exemple - Uranium Waste
-	 * @var string
+	 * @var string 2024/05/04 Exemple - Uranium Waste
 	 */
 	protected string $mDisplayName = '';
 
 	/**
-	 * 2024/05/04 Exemple - The by-product of consuming Uranium Fuel Rods in the Nuclear Power Plant.\r\nNon-fissile Uranium can be extracted. Handle with caution.\r\n\r\nCaution: HIGHLY Radioactive.
-	 * @var string
+	 * @var string 2024/05/04 Exemple - The by-product of consuming Uranium Fuel Rods in the Nuclear Power Plant.\r\nNon-fissile Uranium can be extracted. Handle with caution.\r\n\r\nCaution: HIGHLY Radioactive.
 	 */
 	protected string $mDescription = '';
 
@@ -134,7 +124,7 @@ abstract class FGElement
 	}
 
 	/**
-	 * Extraire, de l'identifiant unique de cet objet, sa version courte.
+	 * Extraire, de l'identifiant unique de cet objet, la version courte de son nom.
 	 * @example (2024/14/10)
 	 * <br>NuclearWaste, Biomass_Leaves
 	 * @return string
@@ -154,7 +144,7 @@ abstract class FGElement
 	}
 
 	/**
-	 * Obtenir l'eventuelle description de cet objet.
+	 * Obtenir la description de cet objet.
 	 * @example (2024/05/04)
 	 * <br>Fuel, packaged for alternative transport. Can be used as fuel for Vehicles or the Jetpack.
 	 * @return string
@@ -201,14 +191,18 @@ abstract class FGElement
 	///// Interface statique
 	/////
 
-
+	/**
+	 * @var array Liste complete des elements extraits du fichier source.
+	 * Ces elements sont organises par categories ('FGItem', 'FGBuilding', 'FGRecipe', ...).
+	 * <p>Format: array(string $cat => array(string $ClassName => ? extends FGElement $element))</p>
+	 */
 	private static array $all;
 
 	/**
 	 * Definir la liste integrale des elements d'une categorie.
-	 * @param string $cat Categorie des elements (FGItem, FGBuilding, FGRecipe, ...)
+	 * @param string $cat Categorie des elements ('FGItem', 'FGBuilding', 'FGRecipe', ...).
 	 * @param array $elements Liste des elements
-	 * <br>Format : array(string ClassName => FGElement)
+	 * <p>Format : array(string ClassName => FGElement)</p>
 	 * @throws Exception Si deux elements ont le meme DisplayName
 	 */
 	static function setCat(string $cat, array &$elements) {
@@ -226,30 +220,33 @@ abstract class FGElement
 		self::$all[$cat] = &$elements;
 	}
 
-	/**
-	 * Obtenir la liste des elements d'une categorie.
-	 * @return array array(string ClassName => FGElement)
-	 */
 	static function &getAll(): array {
 		return self::$all;
 	}
 
+	/**
+	 * Obtenir la liste des elements d'une categorie.
+	 * @param string $cat Nom de la categorie ('FGItem', 'FGBuilding', 'FGRecipe', ...).
+	 * @return array array(string ClassName => FGElement)
+	 */
 	static function &getCat(string $cat): array {
 		return self::$all[$cat];
 	}
 
 
 	/**
+	 * Extraire le ClassName d'un element a partir de son BluePrintClassName (BPCN)
 	 * @param string $bpClassName ex: /Game/FactoryGame/Resource/Parts/GenericBiomass/Desc_Leaves.Desc_Leaves_C
 	 * @return string ex: retourne Desc_Leaves_C
 	 */
-	static function convBPCNtoClassName(string $bpClassName): string {
+	static function extractClassNameFromBPCN(string $bpClassName): string {
 		$pos = strrpos($bpClassName, '.');
 		if ($pos === false) throw new Exception($bpClassName);
 		return substr($bpClassName, $pos+1);
 	}
 
 	/**
+	 * Extraire le nom d'un element a partir de son ClassName
 	 * @param string $ClassName ex: Desc_Leaves_C
 	 * @return string ex: retourne Leaves_C
 	 */
@@ -258,6 +255,7 @@ abstract class FGElement
 	}
 
 	/**
+	 * Extraire la version courte du nom d'un element a partir de son ClassName
 	 * @param string $ClassName ex: Desc_Leaves_C
 	 * @return string ex: retourne Leaves
 	 */
@@ -269,11 +267,23 @@ abstract class FGElement
 		return substr($ClassName, $start+1, $end-$start-1);
 	}
 
+	/**
+	 * Obtenir le ClassName d'un element a partir de son nom convivial
+	 * @param string $cat Categorie de l'element
+	 * @param string $needle Nom convivial
+	 * @return string
+	 */
 	static function getClassNameByDisplayName(string $cat, string $needle): string {
 		$fge = FGElement::getByDisplayName($cat, $needle);
 		return $fge->getClassName();
 	}
 
+	/**
+	 * Obtenir un element a partir de son ClassName
+	 * @param string $cat Categorie de l'element
+	 * @param string $needle ClassName
+	 * @return object Element trouve
+	 */
 	static function getByClassName(string $cat, string $needle): object {
 		$elements = self::getCat($cat);
 
@@ -289,6 +299,12 @@ abstract class FGElement
 		}
 	}
 
+	/**
+	 * Obtenir un element a partir de son nom convivial
+	 * @param string $cat Categorie de l'element
+	 * @param string $needle Nom convivial
+	 * @return object Element trouve
+	 */
 	static function getByDisplayName(string $cat, string $needle): object {
 		$elements = self::getCat($cat);
 
@@ -304,6 +320,12 @@ abstract class FGElement
 		}
 	}
 
+	/**
+	 * Obtenir un element a partir de son nom
+	 * @param string $cat Categorie de l'element
+	 * @param string $needle Nom
+	 * @return object Element trouve
+	 */
 	static function getByName(string $cat, string $needle): object {
 		$elements = self::getCat($cat);
 

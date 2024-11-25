@@ -13,11 +13,21 @@ abstract class View
 				$cssClass .= ' SrcPickUp';
 			}
 
-			if ($element->isRadioactive()) {
+			if ($element->isRadioactive() && $element->isFuel()) {
+				$cssClass .= ' RadioactivePower';
+			} elseif ($element->isRadioactive()) {
 				$cssClass .= ' Radioactive';
+			} elseif ($element->isFuel()) {
+				$cssClass .= ' Power';
 			}
 		} else if ($element instanceof FGRecipe) {
 			if ($element->isAlternate()) {
+			}
+		} else if ($element instanceof FGBuilding) {
+			if ($element->isPowerGenerator()) {
+				$cssClass .= ' PowerGenerator';
+			} elseif ($element->isResourceExtractor()) {
+				$cssClass .= ' Extractor';
 			}
 		}
 
@@ -27,77 +37,109 @@ abstract class View
 	static function echoFGElement(FGElement $element) {
 		$spanClass = self::getElementSpanClass($element);
 
+		echo '<div class="tooltip">';
+		
 		echo '<span';
-		echo ' class="tooltip';
-		if (isset($spanClass)) echo " {$spanClass}";
-		echo '"';
+		$triggerSpanClasses = array();
+		if (isset($spanClass)) $triggerSpanClasses[] = $spanClass;
+		$triggerSpanClasses[] = 'tooltiptrigger';
+    	if (!empty($triggerSpanClasses)) echo ' class="'.implode(' ', $triggerSpanClasses).'"';
 		echo '>';
 		echo htmlspecialchars($element->getDisplayName());
-
+		echo '</span>';
+		
 		echo '<div class="tooltiptext">';
 	    echo $element->__toString2(FGElement::TS_HTML_BLOCKTAG);
 		echo '</div>';
 
-		echo '</span>';
-	}
-
-	static function echoFGElement2(FGElement $element) {
-		$spanClass = self::getElementSpanClass($element);
-
-		echo '<span';
-		if (isset($spanClass)) echo ' class="'.$spanClass.'"';
-		echo ' title="', $element->__toString2(FGElement::TS_HTML_TAGATTR_TITLE), '"';
-		echo '>';
-		echo htmlspecialchars($element->getDisplayName());
-		if ($element instanceof FGItem) {
-			if ($element->isRawRessource()) {
-			}
-		} else if ($element instanceof FGRecipe) {
-			if ($element->isAlternate()) {
-			}
-		}
-		echo '</span>';
+		echo '</div>';
 	}
 
 	static function showAllElements(int $style = 1) {
 		$all = FGElement::getAll();
 
 		switch ($style) {
+		    
 			case 0:
-				foreach($all as $cat => &$elements) {
-					echo '<h1>', count($elements), ' ', $cat, '</h1><ul>';
-					foreach($elements as $element) echo '<li>', View::echoFGElement($element), '</li>';
-					echo '</ul>';
-				}
+			foreach($all as $cat => &$elements) {
+				echo '<h1>', count($elements), ' ', $cat, '</h1><ul>';
+				foreach($elements as $element) echo '<li>', View::echoFGElement($element), '</li>';
+				echo '</ul>';
+			}
 
-				break;
+			break;
+			
 			case 1:
-				$categories = array_keys($all);
-				$catSizeMax = 0;
+			
+			$all2 = array();
+			foreach($all as $cat => &$elements) {
+				foreach($elements as $element) {
+					$category = $cat;
+					if ('FGItem' == $cat) {
+						/* @var $element FGItem */
+						//if ($element->isFuel()) $category .= ' (Fuel)';
+						
+					} elseif ('FGBuilding' == $cat) {
+						/* @var $element FGBuilding */
+						//if ($element->isPowerGenerator()) $category .= ' (Power Generator)';
+						//elseif ($element->isResourceExtractor()) $category .= ' (Extractor)';
+						
+					} elseif ('FGRecipe' == $cat) {
+						/* @var $element FGRecipe */
+						if ($element->isAlternate()) $category .= ' (Alternate)';
+						
+					} elseif ('FGSchematic' == $cat) {
+						/* @var $element FGSchematic */
+						
+					}
+					if (!array_key_exists($category, $all2)) $all2[$category] = array();
+					$all2[$category][] = $element;
+				}
+			}
+			$all = $all2;
+			unset($all2);
+			
+			$categories = array_keys($all);
+			$catSizeMax = 0;
 
-				echo '<table>';
+			echo '<table>';
+			echo '<tr>';
+			foreach($categories as $cat) {
+				$elements = $all[$cat];
+				$catSize = count($elements);
+				if ($catSizeMax < $catSize) $catSizeMax = $catSize;
+				echo '<th>', count($elements), ' ', $cat, '</th>';
+			}
+			echo '</tr>';
+
+			
+			$keys = array_keys($all);
+			$values = array_fill(0, count($keys), true);
+			$first = array_combine($keys, $values);
+			unset($keys, $values);
+			
+			foreach(array_keys($all) as $cat) {
+				reset($all[$cat]);
+			}
+			for($rowID = 0; $rowID<$catSizeMax; $rowID++) {
 				echo '<tr>';
-				foreach($all as $cat => &$elements) {
-					$catSize = count($elements);
-					if ($catSizeMax < $catSize) $catSizeMax = $catSize;
-					echo '<th>', count($elements), ' ', $cat, '</th>';
+				foreach ($categories as $cat) {
+					if ($first[$cat]) {
+						$first[$cat] = false;
+						$element = reset($all[$cat]);
+					} else {
+					$element = next($all[$cat]);
+					}
+					echo '<td>';
+					if (false !== $element) View::echoFGElement($element);
+					echo '</td>';
+
 				}
 				echo '</tr>';
+			}
+			echo '</table>';
 
-				for($rowID = 0; $rowID<$catSizeMax; $rowID++) {
-					echo '<tr>';
-					foreach ($categories as $cat) {
-						$element = next($all[$cat]);
-						echo '<td>';
-						if (false !== $element) View::echoFGElement($element);
-						echo '</td>';
-
-					}
-					echo '</tr>';
-				}
-				echo '</table>';
-
-				break;
+			break;
 		}
 	}
 

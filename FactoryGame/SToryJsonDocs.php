@@ -3,7 +3,8 @@ namespace FactoryGame;
 
 use Exception;
 
-abstract class SToryJsonDocs {
+abstract class SToryJsonDocs
+{
 
 	/**
 	 * Obtenir l'adresse du fichier
@@ -83,14 +84,16 @@ abstract class SToryJsonDocs {
 						if ($recipe->isPassThrough()) continue;
 
 						// Supprimer les constructeurs ne pouvant pas faire partie d'une chaine de production.
+						$recipeProducedIn = $recipe->getProducedIn();
 						foreach ($excludes_ProductIn as $className) {
-							if (false !== ($k = array_search($className, $recipe->mProducedIn))) {
-								unset($recipe->mProducedIn[$k]);
+							if (false !== ($k = array_search($className, $recipeProducedIn))) {
+								unset($recipeProducedIn[$k]);
 							}
 						}
+						if ($recipeProducedIn != $recipe->setProducedIn($recipeProducedIn));
 
 						// Ignorer les recettes sans moyen de production
-						if (empty($recipe->mProducedIn)) continue;
+						if (empty($recipe->getProducedIn())) continue;
 						if (array_key_exists($recipe->getClassName(), $recipes)) throw new Exception();
 						$recipes[$recipe->getClassName()] = $recipe;
 					}
@@ -287,7 +290,7 @@ abstract class SToryJsonDocs {
 
 		// FIX: Ajout des recettes induites par les batiments.
 		foreach($buildings as $building) {
-			$buildingRecipes = FGRecipe::parseFromBuilding($building, $items);
+			$buildingRecipes = FGBuilding::getInducedRecipes($building, $items);
 			foreach($buildingRecipes as $buildingRecipe) {
 				if (array_key_exists($buildingRecipe->getClassName(), $recipes)) throw new Exception($buildingRecipe->getClassName());
 				$recipes[$buildingRecipe->getClassName()] = $buildingRecipe;
@@ -301,20 +304,20 @@ abstract class SToryJsonDocs {
 		foreach($recipes as $recipeClassName => $recipe) {
 
 			// Requis : S'assurer que les bâtiments de production sont connus
-			foreach($recipe->mProducedIn as $ClassName) {
+			foreach($recipe->getProducedIn() as $ClassName) {
 				if (!array_key_exists($ClassName, $buildings)) throw new Exception($ClassName);
 			}
 
 			// Postulat : Un seul bâtiments de production par recette
-			if (count($recipe->mProducedIn) !== 1) throw new Exception($recipe);
+			if (count($recipe->getProducedIn()) !== 1) throw new Exception($recipe);
 
 			// Requis : S'assurer que les ingredients sont connus
-			foreach(array_keys($recipe->mIngredients) as $ClassName) {
+			foreach(array_keys($recipe->getIngredients()) as $ClassName) {
 				if (!array_key_exists($ClassName, $items)) throw new Exception($ClassName);
 			}
 
 			// Requis : S'assurer que les produits sont connus
-			foreach(array_keys($recipe->mProduct) as $ClassName) {
+			foreach(array_keys($recipe->getProducts()) as $ClassName) {
 				if (!array_key_exists($ClassName, $items)) throw new Exception($ClassName);
 			}
 

@@ -6,6 +6,33 @@ h2,h3 {
 	margin: 0;
 }
 
+fieldset {
+	background-color: #ffffff20;
+}
+
+.tooltip {
+	display:inline;
+}
+
+.tooltiptrigger:hover + .tooltiptext {
+	visibility: visible;
+}
+
+.tooltip .tooltiptext {
+	position: absolute;
+	visibility: hidden;
+
+	padding: 1em;
+	border-style: double;
+	border-radius: 6px;
+	min-width: 600px;
+
+	background-color: #888888;
+	color: #000000;
+	font-size: 0.8em;
+	font-weight: normal;
+}
+
 /* Objet (Ingredient/Produit) */
 span.FGItem
 , span.FGItemDescriptor
@@ -44,11 +71,6 @@ span.RF_SOLID {
 	color: #000000;
 }
 
-span.Radioactive {
-	/* Element radioactif */
-	/*text-shadow: 0em 0em 0.5em #ffff00;*/
-}
-
 span.SrcPickUp {
 	/* Element naturelle : Recolte manuelle uniquement */
 	color: #505050;
@@ -56,7 +78,6 @@ span.SrcPickUp {
 
 span.FGRecipe {
 	/* Recette */
-	/*font-weight: bold;*/
 	color: #404000;
 }
 
@@ -76,28 +97,25 @@ span.FGBuilding
 
 /* Unlocker - Recipe */
 span.FGSchematic {
-	/*font-weight: bold;*/
 	color: #804000;
 }
 
-fieldset {
-	background-color: #ffffff20;
+span.Extractor::before {
+	content: "⛏";
 }
 
-.tooltip .tooltiptext {
-	position: absolute;
-	visibility: hidden;
-
-	width: 800px;
-	padding:1em;
-	border-style: double;
-
-	background-color: #888888;
-	color: #000000;
-	font-size: 0.8em;
-	font-weight: normal;
+span.Radioactive::after {
+	content: "☢";
 }
 
-.tooltip:hover .tooltiptext {
-	visibility: visible;
+span.Power::after {
+	content: "🗲";
+}
+
+span.RadioactivePower::after {
+	content: "🗲☢";
+}
+
+span.PowerGenerator::before {
+	content: "🗲";
 }

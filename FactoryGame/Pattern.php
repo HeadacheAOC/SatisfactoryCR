@@ -7,12 +7,19 @@ abstract class Pattern {
 	const VERBOSE = false;
 	private static ?array $ingredients = null;
 
+	/**
+	 * (En cours d'implementation...)
+	 * @return array
+	 */
 	public static function getProductors(): array {
 		if (!isset(self::$ingredients)) self::initialize();
 		return self::$ingredients;
 	}
 
-
+	/**
+	 * (En cours d'implementation...)
+	 * @return array
+	 */
 	public static function initialize(?array $allRecipe = null) {
 		if (!isset($allRecipe)) $allRecipe = FGElement::getCat('FGRecipe');
 		$allItem = FGElement::getCat('FGItem');
@@ -61,6 +68,10 @@ abstract class Pattern {
 
 	}
 
+	/**
+	 * (En cours d'implementation...)
+	 * @return array
+	 */
 	static function try(array &$ingredients, array &$allRecipe, array &$wasteProduction, array $allItemAmountRatio_base) {
 
 		// Lister les recettes qui peuvent etre mises en production avec les ingredients a disposition (ressources naturelles)
@@ -88,17 +99,17 @@ abstract class Pattern {
 		foreach($recipes as $recipeClassName => $recipe) {
 
 			$ingrCost = 0;
-			foreach($recipe->mIngredients as $ingrClassName => $amount) {
+			foreach($recipe->getIngredients() as $ingrClassName => $amount) {
 				$ingrAmount = $amount * $allItemAmountRatio_base[$ingrClassName];
 				$ingrCost += $ingrAmount * $ingredients[$ingrClassName]['-'];
 			}
 
 			$prodAmount = 0;
-			foreach($recipe->mProduct as $prodClassName => $amount) {
+			foreach($recipe->getProducts() as $prodClassName => $amount) {
 				$prodAmount += $amount * $allItemAmountRatio_base[$prodClassName];
 			}
 
-			foreach($recipe->mProduct as $prodClassName => $amount) {
+			foreach($recipe->getProducts() as $prodClassName => $amount) {
 				$prodAmount = $amount * $allItemAmountRatio_base[$prodClassName];
 				$prodValue = $ingrCost / $prodAmount;
 
@@ -126,7 +137,10 @@ abstract class Pattern {
 		}
 	}
 
-
+	/**
+	 * (En cours d'implementation...)
+	 * @return array
+	 */
 	static function &getAllItemAmountRatio_base(array &$items): array {
 		$res = array();
 		foreach($items as $itemClassName => $item) {
@@ -140,6 +154,10 @@ abstract class Pattern {
 		return $res;
 	}
 
+	/**
+	 * (En cours d'implementation...)
+	 * @return array
+	 */
 	static function &getAllWorldRessourceValue_base(array &$items): array {
 
 		$res = array();
@@ -157,7 +175,13 @@ abstract class Pattern {
 		return $res;
 	}
 
+	/**
+	 * Extraire la liste des dechets
+	 * @param array $items
+	 * @return array
+	 */
 	static function &getWasteProduction(array &$items): array {
+		/* @var $item FGItem */
 		$res = array();
 		foreach($items as $itemClassName => $item) {
 			if ($item->wasteProduction() > 0) {
@@ -168,7 +192,13 @@ abstract class Pattern {
 		return $res;
 	}
 
-
+	/**
+	 * Extraire la liste des ressources naturelles qui peuvent etre extraites/collectees
+	 * @param array $items
+	 * @param bool $appendRaw
+	 * @param bool $appendPickUp
+	 * @return array
+	 */
 	static function &getWorldRessources(array &$items, bool $appendRaw, bool $appendPickUp): array {
 		$res = array();
 		foreach($items as $itemClassName => $item) {
@@ -180,6 +210,7 @@ abstract class Pattern {
 	}
 
 	/**
+	 * (En cours d'implementation...)
 	 * Obtenir la liste des produits des recettes fournies.
 	 * @return array
 	 * <pre>
@@ -192,7 +223,7 @@ abstract class Pattern {
 	static function &getProductionByProduct(array &$recipes): array {
 		$res = array();
 		foreach($recipes as $recipeClassName => $recipe) {
-			foreach(array_keys($recipe->mProduct) as $itemClassName) {
+			foreach(array_keys($recipe->getProducts()) as $itemClassName) {
 				if (!isset($res[$itemClassName])) $res[$itemClassName] = array();
 				$res[$itemClassName][$recipeClassName] = round($recipe->getProductPM($itemClassName), 6);
 			}
@@ -201,6 +232,7 @@ abstract class Pattern {
 	}
 
 	/**
+	 * (En cours d'implementation...)
 	 * Obtenir la liste des ingredients des recettes fournies.
 	 * @return array
 	 * <pre>
@@ -213,7 +245,7 @@ abstract class Pattern {
 	static function &getConsumeByIngredient(array &$recipes): array {
 		$res = array();
 		foreach($recipes as $recipeClassName => $recipe) {
-			foreach(array_keys($recipe->mIngredients) as $itemClassName) {
+			foreach(array_keys($recipe->getIngredients()) as $itemClassName) {
 				if (!isset($res[$itemClassName])) $res[$itemClassName] = array();
 				$res[$itemClassName][$recipeClassName] = round($recipe->getIngredientPM($itemClassName), 6);
 			}
@@ -237,7 +269,7 @@ abstract class Pattern {
 		foreach($allowedRecipes as $recipeClassName => $recipe) {
 			if ($recipe->isPassThrough() || (!$allowAlernates && $recipe->isAlternate())) continue;
 			$ableto = true;
-			foreach(array_keys($recipe->mIngredients) as $ingrClassName) {
+			foreach(array_keys($recipe->getIngredients()) as $ingrClassName) {
 				if (!array_key_exists($ingrClassName, $ingredients)) $ableto = false;
 				if (!$ableto) break;
 			}
@@ -261,7 +293,7 @@ abstract class Pattern {
 		$res = array();
 		foreach ($allowedRecipes as $recipe) {
 			if ($recipe->isPassThrough() || (!$allowAlernates && $recipe->isAlternate())) continue;
-			if (array_key_exists($itemClassName, $recipe->mIngredients)) {
+			if (array_key_exists($itemClassName, $recipe->getIngredients())) {
 				$res[$recipe->getClassName()] = $recipe;
 			}
 		}
@@ -269,6 +301,7 @@ abstract class Pattern {
 	}
 
 	/**
+	 * (En cours d'implementation...)
 	 * Obtenir la recette qui produit le plus d'exemplaires de l'objet demandé, par minute.
 	 * @param array $allowedRecipes array(? => FGRecipe)
 	 * @param string $itemClassName
@@ -315,6 +348,24 @@ abstract class Pattern {
 					$pmMax = $pm;
 					$res[$recipe->getClassName()] = $recipe;
 				}
+			}
+		}
+		return $res;
+	}
+
+	/**
+	 * Obtenir la liste des recettes compatibles avec le batiment designe
+	 * @param array $allowedRecipes
+	 * @param string $buildingClassName
+	 * @param bool $allowAlernates
+	 * @return array
+	 */
+	static function searchRecipesByBuilding(array &$allowedRecipes, string $buildingClassName, bool $allowAlernates = false): array {
+		$res = array();
+		foreach ($allowedRecipes as $recipe) {
+			if ($recipe->isPassThrough() || (!$allowAlernates && $recipe->isAlternate())) continue;
+			if (in_array($buildingClassName, $recipe->getProducedIn())) {
+				$res[$recipe->getClassName()] = $recipe;
 			}
 		}
 		return $res;

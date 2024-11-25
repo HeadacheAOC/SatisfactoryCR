@@ -97,15 +97,15 @@ class Factory
 
 		// Repercuter sur la consommation/production
 
-		$multiplier = $amount * $recipe->getCyclesPM();
+		$multiplier = $amount * $recipe->getCyclePM();
 
 		// Ajouter les ingrédients
-		foreach ($recipe->mIngredients as $ingrClassName => $ingrAmount) {
+		foreach ($recipe->getIngredients() as $ingrClassName => $ingrAmount) {
 			$this->_addIngredient($ingrClassName, $multiplier * $ingrAmount);
 		}
 
 		// Ajouter les produis
-		foreach ($recipe->mProduct as $prodClassName => $prodAmount) {
+		foreach ($recipe->getProducts() as $prodClassName => $prodAmount) {
 			$this->_addProduct($prodClassName, $multiplier * $prodAmount);
 		}
 
@@ -302,9 +302,9 @@ class Factory
 					if (is_null($recipe)) continue; // Aucune recette adaptee
 
 					// Combler le deficite
-					foreach ($recipe->mProduct as $prodClassName => $prodPM) {
+					foreach ($recipe->getProducts() as $prodClassName => $prodPM) {
 						if ($prodClassName === $ingrClassName) {
-							$this->addRecipeByObjet($recipe, ($missingIngrPM/$prodPM) / $recipe->getCyclesPM());
+							$this->addRecipeByObjet($recipe, ($missingIngrPM/$prodPM) / $recipe->getCyclePM());
 							$awake = true;
 						}
 					}
@@ -541,7 +541,7 @@ class Factory
 
 			// Rechercher le bâtiment chargé d'utiliser la recette
 			$building = null;
-			foreach ($recipe->mProducedIn as $buildingClassName) {
+			foreach ($recipe->getProducedIn() as $buildingClassName) {
 				if (array_key_exists($buildingClassName, $buildings)) $building = FGElement::getByClassName('FGBuilding', $buildingClassName);
 				if (!is_null($building)) break;
 			}

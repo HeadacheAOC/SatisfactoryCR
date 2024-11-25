@@ -7,59 +7,47 @@ class FGItem extends FGElement
 {
 
 	/**
-	 * Determine si l'objet est a l'etat liquide, solide ou gazeux.
+	 * @var string Determine si l'objet est a l'etat liquide, solide ou gazeux.
 	 * 2024/05/04 Valeurs - RF_SOLID, RF_LIQUID, RF_INVALID, RF_GAS, RF_HEAT
-	 * @var string
 	 */
 	private string $mForm = 'RF_INVALID';
 
 	/**
-	 * Informe le joueur si l'objet peut etre directement collecte en explorant l'univers.
+	 * @var bool Informe le joueur si l'objet peut etre directement collecte en explorant l'univers.
 	 * L'Iron Ore est collectable a la main contrairement au Water ;)
-	 * @var bool
 	 */
 	private bool $mRememberPickUp = false;
 
 	/**
-	 * Determine si cet objet peut etre supprime.
+	 * @var bool Determine si cet objet peut etre supprime.
 	 * 2024/05/04 Ne peuvent pas etre supprimes - Uranium Waste, Plutonium Waste, Non-fissile Uranium, Plutonium Pellet, Encased Plutonium Cell, HUB Parts, Purple Power Slug, Yellow Power Slug, Blue Power Slug.
-	 * @var bool
 	 */
 	private bool $mCanBeDiscarded = false;
 
 	/**
-	 * Energie potentielle en KJ ou en J ?
+	 * @var float Energie potentielle en KJ ou en J ?
 	 * 2024/05/04 Valeurs - 1500000 (Plutonium Fuel Rod), 750000 (Uranium Fuel Rod)
-	 * @var float
 	 */
 	private float $mEnergyValue = 0;
 
 	/**
-	 * Radioactivite de l'objet
+	 * @var float Radioactivite de l'objet
 	 * 2024/05/04 Valeurs - 0, 0.5, 0.75, 10, 15, 20, 50, 120, 200, 250
-	 * @var float
 	 */
 	private float $mRadioactiveDecay = 0;
 
 	/**
-	 * Nombre de dechets resultants de la consommation de cet objet.
+	 * @var integer Nombre de dechets resultants de la consommation de cet objet.
 	 * 2024/05/04 - La consommation d'une unite d'Uranium Fuel Rod produit consequemment 50 unites d'Uranium Waste.
-	 * @var integer
 	 */
 	private int $mAmountOfWaste = 0;
 
 	/**
-	 * ClassName du dechet resultant de la consommation de cet objet.
+	 * @var string|NULL ClassName du dechet resultant de la consommation de cet objet.
 	 * 2024/05/04 - La consommation d'Uranium Fuel Rod (Desc_NuclearFuelRod_C) produit consequemment de l'Uranium Waste (Desc_NuclearWaste_C).
-	 * @var string|NULL
 	 */
 	private ?string $mSpentFuelClass = null;
 
-
-
-	/////////////////////////
-	///// Construction
-	/////
 
 	static function parse(string $NativeClass, object $itemDesc): FGItem {
 		/*
@@ -145,7 +133,7 @@ class FGItem extends FGElement
 					$matches = array();
 					if (0 == preg_match('/^(?P<Item>\/Script\/Engine\.BlueprintGeneratedClass\'(?P<BlueprintClassName>[^\']+)\')$/', $varvalue, $matches)) throw new Exception($varvalue);
 					$varvalue_AsBPCN = $matches['BlueprintClassName'];
-					$item->mSpentFuelClass = FGElement::convBPCNtoClassName($varvalue_AsBPCN);
+					$item->mSpentFuelClass = FGElement::extractClassNameFromBPCN($varvalue_AsBPCN);
 					break;
 			}
 		}
@@ -163,21 +151,33 @@ class FGItem extends FGElement
 		$str = parent::__toString2($format);
 		switch($format) {
 		case FGElement::TS_HTML_BLOCKTAG:
+			if ($this->isFuel()) $str .= "<p>Energy: {$this->mEnergyValue} MJ</p>";
+			if ($this->isRadioactive()) $str .= "<p>Radioactivity: {$this->mRadioactiveDecay}</p>";
 			$str .= '<h2>Produced by</h2>';
 			$recipes = Pattern::searchRecipesByProduct(FGElement::getCat('FGRecipe'), $this->ClassName, true);
-			$str .= '<ul>';
-			foreach($recipes as $recipe) {
-				$str .= '<li>'.$recipe->__toString2($format).'</li>';
+			uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {return floor($compFGRecipe1->getProductPM($this->ClassName)*100)-floor($compFGRecipe2->getProductPM($this->ClassName)*100);});
+			if (empty($recipes)) {
+				$str .= '<i>none</i>';
+			} else {
+				$str .= '<ul>';
+				foreach($recipes as $recipe) {
+					$str .= '<li>'.$recipe->__toString2($format).'</li>';
+				}
+				$str .= '</ul>';
 			}
-			$str .= '</ul>';
 
 			$str .= '<h2>Consumed by</h2>';
 			$recipes = Pattern::searchRecipesByIngredients2(FGElement::getCat('FGRecipe'), $this->ClassName, true);
-			$str .= '<ul>';
-			foreach($recipes as $recipe) {
-				$str .= '<li>'.$recipe->__toString2($format).'</li>';
+			uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {return floor($compFGRecipe1->getIngredientPM($this->ClassName)*100)-floor($compFGRecipe2->getIngredientPM($this->ClassName)*100);});
+			if (empty($recipes)) {
+				$str .= '<i>none</i>';
+			} else {
+				$str .= '<ul>';
+				foreach($recipes as $recipe) {
+					$str .= '<li>'.$recipe->__toString2($format).'</li>';
+				}
+				$str .= '</ul>';
 			}
-			$str .= '</ul>';
 			break;
 		case FGElement::TS_HTML_INNERTAG:
 			$str .= '<br>Recipes:';
@@ -203,7 +203,7 @@ class FGItem extends FGElement
 
 
 	/////////////////////////
-	///// Consultation des proprietees de l'objet
+	///// Consultation
 	/////
 
 	/**
@@ -224,14 +224,26 @@ class FGItem extends FGElement
 		return $this->mRememberPickUp && !$this->isRawRessource();
 	}
 
+	/**
+	 * Determiner l'etat de l'objet (solide, liquide, gazeux, ...)
+	 * @return string
+	 */
 	function getForm(): string {
 		return $this->mForm;
 	}
 
-	function isFuel():string {
+	/**
+	 * Determiner l'objet dispose d'un potentiel energetique et pourait donc etre utilise en tant que carburant.
+	 * @return bool
+	 */
+	function isFuel():bool {
 		return $this->mEnergyValue > 0;
 	}
 
+	/**
+	 * Obtenir le pouvoir energetique de l'objet.
+	 * @return float
+	 */
 	function getFuelEnergy():float {
 		return $this->mEnergyValue;
 	}
