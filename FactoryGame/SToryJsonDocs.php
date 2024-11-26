@@ -55,6 +55,9 @@ abstract class SToryJsonDocs
 		$items = array(); // Liste des objets
 		$buildings = array(); // Manufacturer
 		$schematics = array(); // Schémas
+		
+		/* @var $item FGItem */
+		/* @var $recipe FGRecipe */
 
 		// Extraire les elements utiles du fichier
 		foreach($docs as $doc) {
@@ -94,7 +97,10 @@ abstract class SToryJsonDocs
 
 						// Ignorer les recettes sans moyen de production
 						if (empty($recipe->getProducedIn())) continue;
-						if (array_key_exists($recipe->getClassName(), $recipes)) throw new Exception();
+						
+						// Assert - Pas de doublon
+						if (array_key_exists($recipe->getClassName(), $recipes)) throw new Exception($recipe->getClassName());
+						
 						$recipes[$recipe->getClassName()] = $recipe;
 					}
 					break;
@@ -285,16 +291,23 @@ abstract class SToryJsonDocs
 
 		}
 
-		// FIX: Ajout des recettes induites par les batiments.
-
-
-		// FIX: Ajout des recettes induites par les batiments.
+		// Ajout des recettes induites par les batiments.
 		foreach($buildings as $building) {
 			$buildingRecipes = FGBuilding::getInducedRecipes($building, $items);
 			foreach($buildingRecipes as $buildingRecipe) {
 				if (array_key_exists($buildingRecipe->getClassName(), $recipes)) throw new Exception($buildingRecipe->getClassName());
 				$recipes[$buildingRecipe->getClassName()] = $buildingRecipe;
 			}
+		}
+		
+		// Retirer les objets qui ne sont ni produits ni utilises par les recettes
+		foreach(array_keys($items) as $itemClassName) {
+			$keep = false;
+			
+			if (!$keep) $keep = !empty(Pattern::searchRecipesByIngredient($recipes, $itemClassName, true));
+			if (!$keep) $keep = !empty(Pattern::searchRecipesByProduct($recipes, $itemClassName, true));
+			
+			if (!$keep) unset($items[$itemClassName]);
 		}
 
 		// Assertions - Recettes

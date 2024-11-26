@@ -3,9 +3,9 @@
 <head>
 <title>Google</title>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="/index.css">
+<!-- link rel="stylesheet" href="/index.css" -->
 <style>
-/* CSS DEVONLY */
+<?php include('index.css') ?>
 </style>
 </head>
 <body>

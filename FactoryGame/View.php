@@ -37,6 +37,51 @@ abstract class View
 	static function echoFGElement(FGElement $element) {
 		$spanClass = self::getElementSpanClass($element);
 
+		echo '<label class="tooltip">';
+		echo '<span';
+		$triggerSpanClasses = array();
+		if (isset($spanClass)) $triggerSpanClasses[] = $spanClass;
+		//$triggerSpanClasses[] = 'tooltiptrigger';
+    	if (!empty($triggerSpanClasses)) echo ' class="'.implode(' ', $triggerSpanClasses).'"';
+		echo '>';
+		echo htmlspecialchars($element->getDisplayName());
+		echo '</span>';
+		echo '<input type="checkbox">';
+		
+		echo '<div class="tooltiptext">';
+	    echo $element->__toString2(FGElement::TS_HTML_BLOCKTAG);
+		echo '</div>';
+		
+		echo '</label>';
+	}
+
+	static function echoFGElement2(FGElement $element) {
+		/*
+		.tooltip {
+			display:inline;
+		}
+		
+		.tooltiptrigger:hover + .tooltiptext {
+			visibility: visible;
+		}
+		
+		.tooltip .tooltiptext {
+			position: absolute;
+			visibility: hidden;
+		
+			padding: 1em;
+			border-style: double;
+			border-radius: 6px;
+			min-width: 600px;
+		
+			background-color: #888888;
+			color: #000000;
+			font-size: 0.8em;
+			font-weight: normal;
+		}
+		 */
+		$spanClass = self::getElementSpanClass($element);
+
 		echo '<div class="tooltip">';
 		
 		echo '<span';
@@ -87,6 +132,7 @@ abstract class View
 					} elseif ('FGRecipe' == $cat) {
 						/* @var $element FGRecipe */
 						if ($element->isAlternate()) $category .= ' (Alternate)';
+						elseif ($element->isInduced()) $category .= ' (Induced)';
 						
 					} elseif ('FGSchematic' == $cat) {
 						/* @var $element FGSchematic */

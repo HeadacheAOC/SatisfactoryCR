@@ -151,8 +151,8 @@ class FGItem extends FGElement
 		$str = parent::__toString2($format);
 		switch($format) {
 		case FGElement::TS_HTML_BLOCKTAG:
-			if ($this->isFuel()) $str .= "<p>Energy: {$this->mEnergyValue} MJ</p>";
-			if ($this->isRadioactive()) $str .= "<p>Radioactivity: {$this->mRadioactiveDecay}</p>";
+			if ($this->isFuel()) $str .= " <span>🗲 {$this->mEnergyValue} MJ</span>";
+			if ($this->isRadioactive()) $str .= " <span>☢ {$this->mRadioactiveDecay}</span>";
 			$str .= '<h2>Produced by</h2>';
 			$recipes = Pattern::searchRecipesByProduct(FGElement::getCat('FGRecipe'), $this->ClassName, true);
 			uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {return floor($compFGRecipe1->getProductPM($this->ClassName)*100)-floor($compFGRecipe2->getProductPM($this->ClassName)*100);});
@@ -167,7 +167,7 @@ class FGItem extends FGElement
 			}
 
 			$str .= '<h2>Consumed by</h2>';
-			$recipes = Pattern::searchRecipesByIngredients2(FGElement::getCat('FGRecipe'), $this->ClassName, true);
+			$recipes = Pattern::searchRecipesByIngredient(FGElement::getCat('FGRecipe'), $this->ClassName, true);
 			uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {return floor($compFGRecipe1->getIngredientPM($this->ClassName)*100)-floor($compFGRecipe2->getIngredientPM($this->ClassName)*100);});
 			if (empty($recipes)) {
 				$str .= '<i>none</i>';

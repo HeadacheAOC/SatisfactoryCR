@@ -23,7 +23,6 @@ class FGRecipe extends FGElement
 
 		// Alternative
 		case FGElement::TS_HTML_BLOCKTAG:
-		case FGElement::TS_HTML_TAGATTR_TITLE:
 
 			// 50 Non-fissile Uranium, 15000 Water <= Blender(Non-fissile Uranium) <= 37.5 Uranium Waste, 25 Silican, 15000 Nitric Acid, 15000 Sulfuric Acid
 
@@ -254,6 +253,7 @@ class FGRecipe extends FGElement
 		if (empty($recipe->FullName)) {
 			$foo = array();
 			$foo[] = 'BlueprintGeneratedClass /Game/FactoryGame/Recipes';
+			$foo[] = 'InducedRecipes';
 			$foo[] = $buildingType;
 			$foo[] = "{$ClassName}.{$recipe->ClassName}";
 			
@@ -401,6 +401,10 @@ class FGRecipe extends FGElement
 		//TODO Se referer a FGSchematics semble etre plus juste
 		//return (false !== stripos($this->ClassName, 'ALTERNATE')) || (false !== stripos($this->mDisplayName, 'ALTERNATE'));
 		return 0 === strpos($this->FullName, "BlueprintGeneratedClass /Game/FactoryGame/Recipes/AlternateRecipes");
+	}
+	
+	function isInduced(): bool {
+		return 0 === strpos($this->FullName, "BlueprintGeneratedClass /Game/FactoryGame/Recipes/InducedRecipes");
 	}
 
 }

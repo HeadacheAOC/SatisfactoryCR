@@ -289,7 +289,7 @@ abstract class Pattern {
 	 * @param bool $addIfFaster
 	 * @return array array(string ClassName => FGRecipe)
 	 */
-	static function searchRecipesByIngredients2(array &$allowedRecipes, string $itemClassName, bool $allowAlernates = false): array {
+	static function searchRecipesByIngredient(array &$allowedRecipes, string $itemClassName, bool $allowAlernates = false): array {
 		$res = array();
 		foreach ($allowedRecipes as $recipe) {
 			if ($recipe->isPassThrough() || (!$allowAlernates && $recipe->isAlternate())) continue;

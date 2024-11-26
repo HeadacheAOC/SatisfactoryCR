@@ -39,6 +39,7 @@ class FGBuilding extends FGElement
 		$str = parent::__toString2($format);
 		switch($format) {
 		case FGElement::TS_HTML_BLOCKTAG:
+			$str .= " <span>🗲 {$this->getPowerConsumptionPM()} MJ</span>";
 			$str .= '<h2>Can produce</h2>';
 			$recipes = Pattern::searchRecipesByBuilding(FGElement::getCat('FGRecipe'), $this->ClassName, true);
 			$str .= '<ul>';
