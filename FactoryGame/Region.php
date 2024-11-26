@@ -12,7 +12,7 @@ abstract class Region {
 
 	public function __construct(bool $AllInOne) {
 		$this->AllInOne = $AllInOne;
-		$this->addFactory('AllInOne');
+		if ($this->AllInOne) $this->addFactory('AllInOne');
 	}
 
 	protected function addFactory(string $name): Factory {
