@@ -34,6 +34,9 @@ abstract class FGElement
 	 * @var int (HTML) A destination du contenu d'une balise HTML de type block (ex DIV).
 	 */
 	public const TS_HTML_BLOCKTAG = 4;
+	
+	public const TS_HTML_INNERBLOCKTAG = 5;
+	
 
 
 
@@ -166,9 +169,10 @@ abstract class FGElement
 	function __toString2(int $format=0) {
 		switch($format) {
 		case self::TS_HTML_INNERTAG:
+		case self::TS_HTML_INNERBLOCKTAG:
+		case self::TS_HTML_BLOCKTAG:
 			$str = htmlspecialchars($this->mDisplayName);
 			break;
-		case self::TS_HTML_BLOCKTAG:
 		case self::TS_HTML_TAGATTR_TITLE:
 			$str = htmlentities($this->mDisplayName);
 			break;

@@ -155,26 +155,26 @@ class FGItem extends FGElement
 			if ($this->isRadioactive()) $str .= " <span>☢ {$this->mRadioactiveDecay}</span>";
 			$str .= '<h2>Produced by</h2>';
 			$recipes = Pattern::searchRecipesByProduct(FGElement::getCat('FGRecipe'), $this->ClassName, true);
-			uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {return floor($compFGRecipe1->getProductPM($this->ClassName)*100)-floor($compFGRecipe2->getProductPM($this->ClassName)*100);});
+			FGRecipe::asort($recipes, FGRecipe::SORTASC, FGRecipe::SORTBY_ITEM_PRODPM, $this);
 			if (empty($recipes)) {
 				$str .= '<i>none</i>';
 			} else {
 				$str .= '<ul>';
 				foreach($recipes as $recipe) {
-					$str .= '<li>'.$recipe->__toString2($format).'</li>';
+					$str .= '<li>'.$recipe->__toString2(self::TS_HTML_INNERBLOCKTAG).'</li>';
 				}
 				$str .= '</ul>';
 			}
 
 			$str .= '<h2>Consumed by</h2>';
 			$recipes = Pattern::searchRecipesByIngredient(FGElement::getCat('FGRecipe'), $this->ClassName, true);
-			uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {return floor($compFGRecipe1->getIngredientPM($this->ClassName)*100)-floor($compFGRecipe2->getIngredientPM($this->ClassName)*100);});
+			FGRecipe::asort($recipes, FGRecipe::SORTASC, FGRecipe::SORTBY_PROD, $this);
 			if (empty($recipes)) {
 				$str .= '<i>none</i>';
 			} else {
 				$str .= '<ul>';
 				foreach($recipes as $recipe) {
-					$str .= '<li>'.$recipe->__toString2($format).'</li>';
+					$str .= '<li>'.$recipe->__toString2(self::TS_HTML_INNERBLOCKTAG).'</li>';
 				}
 				$str .= '</ul>';
 			}

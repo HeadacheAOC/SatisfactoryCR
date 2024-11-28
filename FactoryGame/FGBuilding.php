@@ -42,9 +42,10 @@ class FGBuilding extends FGElement
 			$str .= " <span>🗲 {$this->getPowerConsumptionPM()} MJ</span>";
 			$str .= '<h2>Can produce</h2>';
 			$recipes = Pattern::searchRecipesByBuilding(FGElement::getCat('FGRecipe'), $this->ClassName, true);
+			FGRecipe::asort($recipes, FGRecipe::SORTASC, FGRecipe::SORTBY_PROD);
 			$str .= '<ul>';
 			foreach($recipes as $recipe) {
-				$str .= '<li>'.$recipe->__toString2($format).'</li>';
+				$str .= '<li>'.$recipe->__toString2(FGElement::TS_HTML_INNERBLOCKTAG).'</li>';
 			}
 			$str .= '</ul>';
 			break;

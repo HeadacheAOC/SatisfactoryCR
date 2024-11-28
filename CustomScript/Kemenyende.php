@@ -35,17 +35,17 @@ class Kemenyende extends Region {
 	}
 
 	protected function step2_addRecipes() {
-		/*$this->addRecipesForLitoralDerrickFactory(480/13.5);
+		$this->addRecipesForLitoralDerrickFactory(480/13.5);
 
 		$this->addRecipesForAssemblyDirectorSystem(1/0.75);
 		$this->addRecipesForMagneticFieldGenerator(480/96.75);
 		$this->addRecipesForThermalPropulsionRocket(1);
-		$this->addRecipesForNuclearPasta(2);*/
+		$this->addRecipesForNuclearPasta(2);
 
 
-		$this->addRecipesForBiochemicalScultor(1);
-		$this->addRecipesForBallisticWarpDrive(1);
-		$this->addRecipesForAIExpansionServer(1);
+		$this->addRecipesForBiochemicalScultor(0.5);
+		$this->addRecipesForBallisticWarpDrive(0.5);
+		$this->addRecipesForAIExpansionServer(0.5);
 
 		// Transformer l'excedent liquide pour le transport par train
 		$this->MaraisS__Nitrogen->addRecipeForConsume____('Dark Matter Crystal', 'Dark Matter Residue', 50000);
@@ -55,19 +55,20 @@ class Kemenyende extends Region {
 
 	protected function step4_Supply() {
 
-	// Nord-Express :  'Relais (HUB)' -> 'Desert: Copper Powder (Sud)' -> 'Desert: Automated Wiring (Est)' -> 'Desert: Magnetic Field Generator (Nord-Est)' -> 'Desert: Compacted Coal (Nord-Ouest)' -> 'Canyon: Adaptive Control Unit & Modular Engine' -> 'Derrick: Power Fuel'
+		// Nord-Express :  'Relais (HUB)' -> 'Desert: Copper Powder (Sud)' -> 'Desert: Automated Wiring (Est)' -> 'Desert: Magnetic Field Generator (Nord-Est)' -> 'Desert: Compacted Coal (Nord-Ouest)' -> 'Canyon: Adaptive Control Unit & Modular Engine' -> 'Derrick: Power Fuel'
 		$this->supply($this->DesertSO___Canyon, $this->DesertNE____MFGen, 'Coal');
 		$this->supply($this->DesertSO___Canyon, $this->DesertE___AutoWir, 'Automated Wiring');
 		$this->supply($this->LitoralN__Derrick, $this->DesertNO_CompCoal, 'Compacted Coal');
 
 
-	// Nord-Express -> Marais
+		// Nord-Express -> Marais
 		$this->supply($this->MaraisE___Bauxite, $this->DesertS__CoppPwdr, 'Copper Powder');
 		$this->supply($this->MaraisE___Bauxite, $this->DesertSO___Canyon, 'Adaptive Control Unit');
 		$this->supply($this->MaraisE___Bauxite, $this->DesertSO___Canyon, 'Modular Engine');
+		$this->supply($this->MaraisS__Nitrogen, $this->DesertNE____MFGen, 'Magnetic Field Generator');
 
 
-	// Marais : 'Relais (HUB)' -> 'Marais: Quartz (Nord-Ouest)' -> 'Marais: Bauxite (Est)' -> 'Marais: Nitrogen (Sud)' -> 'Marais: Crud Oil (Sud-Est)' -> 'Marais: Bauxite (Est)'
+		// Marais : 'Relais (HUB)' -> 'Marais: Quartz (Nord-Ouest)' -> 'Marais: Bauxite (Est)' -> 'Marais: Nitrogen (Sud)' -> 'Marais: Crud Oil (Sud-Est)' -> 'Marais: Bauxite (Est)'
 
 		$this->supply($this->MaraisE___Bauxite, $this->MaraisNO___Quartz, 'Silica');
 		$this->supply($this->MaraisE___Bauxite, $this->MaraisNO___Quartz, 'Quartz Crystal');
@@ -87,15 +88,19 @@ class Kemenyende extends Region {
 
 		//-----
 
-		//$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Nuclear Pasta');
-		//$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Thermal Propulsion Rocket');
-		//$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Crystal Oscillator');
-		//$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Alclad Aluminum Sheet');
+		$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Nuclear Pasta');
+		$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Thermal Propulsion Rocket');
+		$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Crystal Oscillator');
+		$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Alclad Aluminum Sheet');
+		$this->supply($this->MaraisS__Nitrogen, $this->MaraisE___Bauxite, 'Supercomputer');
+		
+		$this->supply($this->MaraisSE__CrudOil, $this->MaraisE___Bauxite, 'Assembly Director System');
+		$this->supply($this->MaraisSE__CrudOil, $this->MaraisS__Nitrogen, 'Reanimated SAM');
 
-		//$this->supply($this->MaraisSE__CrudOil, $this->MaraisS__Nitrogen, 'Reanimated SAM');
-		//$this->supply($this->MaraisSE__CrudOil, $this->MaraisS__Nitrogen, 'Assembly Director System');
-
-		//$this->supply($this->MaraisE___Bauxite, $this->MaraisSE__CrudOil, 'Ficsite Trigon');
+		$this->supply($this->HUB___________HUB, $this->MaraisSE__CrudOil, 'Biochemical Sculptor');
+		$this->supply($this->HUB___________HUB, $this->MaraisS__Nitrogen, 'Ballistic Warp Drive');
+		$this->supply($this->HUB___________HUB, $this->MaraisS__Nitrogen, 'Dark Matter Crystal');
+		$this->supply($this->HUB___________HUB, $this->MaraisS__Nitrogen, 'AI Expansion Server');
 	}
 
 	public function addRecipesForLitoralDerrickFactory(float $amountOf_TurbofuelPowerRecipe) {
@@ -553,7 +558,7 @@ class Kemenyende extends Region {
 		$this->MaraisS__Nitrogen->addRecipeForProduce2___  ('Excited Photonic Matter', 25000*$amountOf_AIExpansionServer); // + 25000 Dark Matter Residue
 
 		$this->MaraisS__Nitrogen->addRecipeForProduce2___  ('Neural-Quantum Processor', 1*$amountOf_AIExpansionServer);
-		$this->MaraisSE__CrudOil->addRecipeForProduce2___    ('Time Crystal', 5*$amountOf_AIExpansionServer);
+		$this->MaraisS__Nitrogen->addRecipeForProduce2___    ('Time Crystal', 5*$amountOf_AIExpansionServer);
 		$this->MaraisS__Nitrogen->addRecipeForProduce2___      ('Diamonds', 10*$amountOf_AIExpansionServer);
 		$this->MaraisS__Nitrogen->addRecipeForProduce____        ('Miner Mk.1: Coal', 'Coal', 200*$amountOf_AIExpansionServer);
 		$this->MaraisE___Bauxite->addRecipeForProduce2___    ('Supercomputer', (4/3)*0.75*$amountOf_AIExpansionServer);

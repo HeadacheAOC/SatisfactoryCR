@@ -22,27 +22,38 @@ class FGRecipe extends FGElement
 			break;
 
 		// Alternative
-		case FGElement::TS_HTML_BLOCKTAG:
+		case FGElement::TS_HTML_INNERBLOCKTAG:
+			
+			$recipeDName = $str;
+			$str = '';
 
 			// 50 Non-fissile Uranium, 15000 Water <= Blender(Non-fissile Uranium) <= 37.5 Uranium Waste, 25 Silican, 15000 Nitric Acid, 15000 Sulfuric Acid
 
 			// ProduceIn - ex: "Blender(Non-fissile Uranium)"
 			$lst = array();
 			foreach ($this->mProducedIn as $className) {
-				$lst[] = $buildings[$className]->mDisplayName;
+				/* @var $building FGBuilding */
+				$building = $buildings[$className];
+				$buildingPower = $building->getPowerConsumptionPM();
+				
+				$buildingLabel = $building->getDisplayName();
+				if ($buildingPower<0) {
+					$buildingLabel .= '🗲'.(-1*$buildingPower);
+				}
+				
+				$lst[] = '<b>'. $buildingLabel .'</b>';
 			}
-			$strRecipe = htmlspecialchars(implode(', ', $lst)) .'('.$str.')';
-			$str = '';
+			$strRecipe = implode(', ', $lst) .'('.$recipeDName.')';
 
 			// Output - ex: "50 Non-fissile Uranium, 15000 Water"
 			$lst = array();
 			foreach ($this->mProduct as $className => $amount) {
 				$lst[] = htmlspecialchars(round($this->getProductPM($className),3).' '.$items[$className]->mDisplayName);
 			}
-			$str .= htmlspecialchars(implode(', ', $lst));
+			$str .= implode(', ', $lst);
 
 			// ProduceIn - ex: " <= Blender(Non-fissile Uranium) <= "
-			$str .= htmlspecialchars(" <= {$strRecipe} <= ");
+			$str .= htmlspecialchars(' <= ') . $strRecipe . htmlspecialchars(' <= ');
 
 			// Input
 			$lst = array();
@@ -51,7 +62,36 @@ class FGRecipe extends FGElement
 			}
 			$str .= htmlspecialchars(implode(', ', $lst));
 
+			break;
+			
+			
 
+		// Alternative
+		case FGElement::TS_HTML_BLOCKTAG:
+			
+			$str .= '<h2>Recipe</h2>';
+			$str .= $this->__toString2(FGElement::TS_HTML_INNERBLOCKTAG);
+
+			$primProduct = $this->getPrimaryProduct();
+			$str .= '<h2>Alternative</h2>';
+			$recipes = array();
+			if (!is_null($primProduct)) {
+				$recipes = Pattern::searchRecipesByProduct(FGElement::getCat('FGRecipe'), $primProduct->ClassName, true);
+				FGRecipe::asort($recipes, FGRecipe::SORTASC, FGRecipe::SORTBY_ITEM_PRODPM, $primProduct);
+			}
+			unset($primProduct);
+			
+			if (array_key_exists($this->ClassName, $recipes)) unset($recipes[$this->ClassName]);
+			
+			if (empty($recipes)) {
+				$str .= '<i>none</i>';
+			} else {
+				$str .= '<ul>';
+				foreach($recipes as $recipe) {
+					$str .= '<li>'.$recipe->__toString2(FGElement::TS_HTML_INNERBLOCKTAG).'</li>';
+				}
+				$str .= '</ul>';
+			}
 			break;
 
 		// Alternative
@@ -291,6 +331,87 @@ class FGRecipe extends FGElement
 			}
 		}
 
+	}
+	
+	
+	public const SORTBY_DNAME = 1;
+	public const SORTBY_ITEM_CONSPM = 2;
+	public const SORTBY_ITEM_PRODPM = 3;
+	public const SORTBY_PROD = 4;
+	
+	
+	public const SORTNATURAL = 0;
+	public const SORTASC = 1;
+	public const SORTDESC = 2;
+	
+	/**
+	 * 
+	 * @param array $recipes
+	 * @param int $asc_desc 1:ASC, 2:DESC. 0:none
+	 * @param int $type 
+	 * <ul>
+	 * <li>0: none</li>
+	 * <li>1: Trier en fonction du nom du premier element consommes.</li>
+	 * <li>2: Trier en fonction de la vitesse de consommation de l'element designe.</li>
+	 * <li>3: Trier en fonction de la vitesse de production de l'element designe.</li>
+	 * <li>3: Trier en fonction du nom du premier element produit puis de la vitesse de production de ce dernier.</li>
+	 * </ul>
+	 * @param FGItem $item
+	 */
+	static function asort(array &$recipes, int $asc_desc, int $type, ?FGItem $item=null) {
+		
+		switch($type) {
+			case self::SORTBY_DNAME:
+				uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {
+					return strcasecmp($compFGRecipe1->getPrimaryProductDisplayName(), $compFGRecipe2->getPrimaryProductDisplayName());
+				});
+				break;
+			case self::SORTBY_ITEM_CONSPM:
+				uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) use ($item) {
+					return floor($compFGRecipe1->getIngredientPM($item->getClassName())*100)-floor($compFGRecipe2->getIngredientPM($item->getClassName())*100);
+				});
+				break;
+			case self::SORTBY_ITEM_PRODPM:
+				uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) use ($item) {
+					return floor($compFGRecipe1->getProductPM($item->getClassName())*100)-floor($compFGRecipe2->getProductPM($item->getClassName())*100);
+				});
+				break;
+			case self::SORTBY_PROD:
+				uasort($recipes, function ($compFGRecipe1, $compFGRecipe2) {
+					
+					$primProduct1 = $compFGRecipe1->getPrimaryProduct();
+					$primProduct2 = $compFGRecipe2->getPrimaryProduct();
+					
+					$primProductDName1 = !is_null($primProduct1) ? $primProduct1->getDisplayName() : '';
+					$primProductDName2 = !is_null($primProduct2) ? $primProduct2->getDisplayName() : '';
+					
+					$byDName = strcasecmp($primProductDName1, $primProductDName2);
+					
+					if (0 != $byDName) return $byDName;
+					
+					$primProductPM1 = !is_null($primProduct1) ? $compFGRecipe1->getProductPM($primProduct1->getClassName()) : 0;
+					$primProductPM2 = !is_null($primProduct2) ? $compFGRecipe2->getProductPM($primProduct2->getClassName()) : 0;
+					
+					return floor($primProductPM1*100)-floor($primProductPM2*100);
+				});
+				break;
+		}
+	}
+	
+	/**
+	 * @return string
+	 */
+	function getPrimaryProductDisplayName(): string {
+		/* @var $item FGItem */
+		$item = $this->getPrimaryProduct();
+		if (is_null($item)) return '';
+	    return $item->getDisplayName();
+	}
+	
+	function getPrimaryProduct(): ?FGItem {
+		if (empty($this->mProduct)) return null;
+		$ClassName = array_key_first($this->mProduct);
+		return FGItem::getByClassName('FGItem', $ClassName);
 	}
 	
 	/**
