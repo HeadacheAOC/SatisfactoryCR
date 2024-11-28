@@ -34,11 +34,11 @@ class FGRecipe extends FGElement
 			foreach ($this->mProducedIn as $className) {
 				/* @var $building FGBuilding */
 				$building = $buildings[$className];
-				$buildingPower = $building->getPowerConsumptionPM();
+				$buildingPower = $building->getPowerProductionPM();
 				
 				$buildingLabel = $building->getDisplayName();
-				if ($buildingPower<0) {
-					$buildingLabel .= '🗲'.(-1*$buildingPower);
+				if ($buildingPower>0) {
+					$buildingLabel .= "🗲{$buildingPower}";
 				}
 				
 				$lst[] = '<b>'. $buildingLabel .'</b>';

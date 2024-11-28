@@ -264,6 +264,8 @@ abstract class SToryJsonDocs
 				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildablePowerBooster'":
 				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGCentralStorageContainer'":
 				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableCornerWallLightweight'":
+					
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableSnowCannon'";
 
 					// SKIP
 					break;

@@ -39,7 +39,7 @@ class FGBuilding extends FGElement
 		$str = parent::__toString2($format);
 		switch($format) {
 		case FGElement::TS_HTML_BLOCKTAG:
-			$str .= " <span>🗲 {$this->getPowerConsumptionPM()} MJ</span>";
+			$str .= " <span>🗲 {$this->getPowerProductionPM()} MJ</span>";
 			$str .= '<h2>Can produce</h2>';
 			$recipes = Pattern::searchRecipesByBuilding(FGElement::getCat('FGRecipe'), $this->ClassName, true);
 			FGRecipe::asort($recipes, FGRecipe::SORTASC, FGRecipe::SORTBY_PROD);
@@ -53,7 +53,7 @@ class FGBuilding extends FGElement
 			$str .= '<br><br>';
 			if ($this->isResourceExtractor()) $str .= htmlspecialchars(' ResourcePM('.$this->getResourcePM().')');
 			if ($this->isPowerGenerator()) {
-				$str .= htmlspecialchars(' PowerGenerationPM('.-$this->getPowerConsumptionPM().')');
+				$str .= htmlspecialchars(' PowerGenerationPM('.$this->getPowerProductionPM().')');
 			} else {
 				$str .= htmlspecialchars(' PowerConsumptionPM('.$this->getPowerConsumptionPM().')');
 			}
@@ -62,7 +62,7 @@ class FGBuilding extends FGElement
 			$str .= '&#10;&#10;';
 			if ($this->isResourceExtractor()) $str .= htmlspecialchars(' ResourcePM('.$this->getResourcePM().')');
 			if ($this->isPowerGenerator()) {
-				$str .= htmlspecialchars(' PowerGenerationPM('.-$this->getPowerConsumptionPM().')');
+				$str .= htmlspecialchars(' PowerGenerationPM('.$this->getPowerProductionPM().')');
 			} else {
 				$str .= htmlspecialchars(' PowerConsumptionPM('.$this->getPowerConsumptionPM().')');
 			}
@@ -71,7 +71,7 @@ class FGBuilding extends FGElement
 			$str .= ' : ';
 			if ($this->isResourceExtractor()) $str .= ' ResourcePM('.$this->getResourcePM().')';
 			if ($this->isPowerGenerator()) {
-				$str .= ' PowerGenerationPM('.-$this->getPowerConsumptionPM().')';
+				$str .= ' PowerGenerationPM('.$this->getPowerProductionPM().')';
 			} else {
 				$str .= ' PowerConsumptionPM('.$this->getPowerConsumptionPM().')';
 			}
@@ -374,6 +374,10 @@ class FGBuilding extends FGElement
 		} else {
 			return $this->mPowerConsumption;
 		}
+	}
+	
+	public function getPowerProductionPM(): float {
+		return -1*$this->getPowerConsumptionPM();
 	}
 }
 
