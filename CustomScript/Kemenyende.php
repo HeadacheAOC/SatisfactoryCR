@@ -48,9 +48,9 @@ class Kemenyende extends Region {
 		$this->addRecipesForAIExpansionServer(0.5);
 
 		// Transformer l'excedent liquide pour le transport par train
-		$this->MaraisS__Nitrogen->addRecipeForConsume____('Dark Matter Crystal', 'Dark Matter Residue', 50000);
-		$this->MaraisS__Nitrogen->addRecipeForProduce2___  ('Diamonds', 10);
-		$this->MaraisS__Nitrogen->addRecipeForProduce____  ('Miner Mk.1: Coal', 'Coal', 200);
+		$this->MaraisS__Nitrogen->addRecipeForConsume____('Dark Matter Crystal', 'Dark Matter Residue', 25000);
+		$this->MaraisS__Nitrogen->addRecipeForProduce2___  ('Diamonds', 5);
+		$this->MaraisS__Nitrogen->addRecipeForProduce____    ('Miner Mk.1: Coal', 'Coal', 100);
 	}
 
 	protected function step4_Supply() {
