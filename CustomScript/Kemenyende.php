@@ -7,6 +7,7 @@ class Kemenyende extends Region {
 	private ?Factory $DesertS__CoppPwdr = null;
 	private ?Factory $DesertE___AutoWir = null;
 	private ?Factory $DesertNE____MFGen = null;
+	private ?Factory $DesertN_____Shard = null;
 	private ?Factory $DesertNO_CompCoal = null;
 	private ?Factory $DesertSO___Canyon = null;
 	private ?Factory $LitoralN__Derrick = null;
@@ -22,6 +23,7 @@ class Kemenyende extends Region {
 		$this->DesertS__CoppPwdr = $this->addFactory('Desert: Copper Powder (Sud)');
 		$this->DesertE___AutoWir = $this->addFactory('Desert: Automated Wiring (Est)');
 		$this->DesertNE____MFGen = $this->addFactory('Desert: Magnetic Field Generator (Nord-Est)');
+		$this->DesertN_____Shard = $this->addFactory('Desert: Power Shard (Nord)');
 		$this->DesertNO_CompCoal = $this->addFactory('Desert: Compacted Coal (Nord-Ouest)');
 		$this->DesertSO___Canyon = $this->addFactory('Canyon: Adaptive Control Unit & Modular Engine');
 		$this->LitoralN__Derrick = $this->addFactory('Derrick: Power Fuel');
@@ -46,6 +48,7 @@ class Kemenyende extends Region {
 		$this->addRecipesForBiochemicalScultor(0.5);
 		$this->addRecipesForBallisticWarpDrive(0.5);
 		$this->addRecipesForAIExpansionServer(0.5);
+		$this->addRecipesForPowerShard(120/128);
 
 		// Transformer l'excedent liquide pour le transport par train
 		$this->MaraisS__Nitrogen->addRecipeForConsume____('Dark Matter Crystal', 'Dark Matter Residue', 25000);
@@ -55,11 +58,14 @@ class Kemenyende extends Region {
 
 	protected function step4_Supply() {
 
-		// Nord-Express :  'Relais (HUB)' -> 'Desert: Copper Powder (Sud)' -> 'Desert: Automated Wiring (Est)' -> 'Desert: Magnetic Field Generator (Nord-Est)' -> 'Desert: Compacted Coal (Nord-Ouest)' -> 'Canyon: Adaptive Control Unit & Modular Engine' -> 'Derrick: Power Fuel'
+		// Nord-Express :  'Relais (HUB)' -> 'Desert: Copper Powder (Sud)' -> 'Desert: Automated Wiring (Est)' -> 'Desert: Magnetic Field Generator (Nord-Est)' -> 'Desert: Compacted Coal (Nord-Ouest)' -> 'Canyon: Adaptive Control Unit & Modular Engine' -> 'Derrick: Power Fuel' ->
 		$this->supply($this->DesertSO___Canyon, $this->DesertNE____MFGen, 'Coal');
 		$this->supply($this->DesertSO___Canyon, $this->DesertE___AutoWir, 'Automated Wiring');
 		$this->supply($this->LitoralN__Derrick, $this->DesertNO_CompCoal, 'Compacted Coal');
-
+		
+		// Nord-Express -> HUB
+		$this->supply($this->HUB___________HUB, $this->DesertN_____Shard, 'Dark Matter Crystal');
+		$this->supply($this->HUB___________HUB, $this->DesertN_____Shard, 'Power Shard');
 
 		// Nord-Express -> Marais
 		$this->supply($this->MaraisE___Bauxite, $this->DesertS__CoppPwdr, 'Copper Powder');
@@ -68,7 +74,7 @@ class Kemenyende extends Region {
 		$this->supply($this->MaraisS__Nitrogen, $this->DesertNE____MFGen, 'Magnetic Field Generator');
 
 
-		// Marais : 'Relais (HUB)' -> 'Marais: Quartz (Nord-Ouest)' -> 'Marais: Bauxite (Est)' -> 'Marais: Nitrogen (Sud)' -> 'Marais: Crud Oil (Sud-Est)' -> 'Marais: Bauxite (Est)'
+		// Marais : 'Relais (HUB)' -> 'Marais: Quartz (Nord-Ouest)' -> 'Marais: Bauxite (Est)' -> 'Marais: Nitrogen (Sud)' -> 'Marais: Crud Oil (Sud-Est)' -> 'Marais: Bauxite (Est)' ->
 
 		$this->supply($this->MaraisE___Bauxite, $this->MaraisNO___Quartz, 'Silica');
 		$this->supply($this->MaraisE___Bauxite, $this->MaraisNO___Quartz, 'Quartz Crystal');
@@ -101,6 +107,8 @@ class Kemenyende extends Region {
 		$this->supply($this->HUB___________HUB, $this->MaraisS__Nitrogen, 'Ballistic Warp Drive');
 		$this->supply($this->HUB___________HUB, $this->MaraisS__Nitrogen, 'Dark Matter Crystal');
 		$this->supply($this->HUB___________HUB, $this->MaraisS__Nitrogen, 'AI Expansion Server');
+		
+		
 	}
 
 	public function addRecipesForLitoralDerrickFactory(float $amountOf_TurbofuelPowerRecipe) {
@@ -627,6 +635,17 @@ class Kemenyende extends Region {
 		$this->MaraisE___Bauxite->addRecipeForProduce2___            ('Iron Ingot', 7.5*$amountOf_AIExpansionServer);
 		$this->MaraisE___Bauxite->addRecipeForProduce____               ('Miner Mk.1: Iron Ore', 'Iron Ore', 7.5*$amountOf_AIExpansionServer);
 
+	}
+	
+	public function addRecipesForPowerShard(float $amountOf_PowerShard) {
+		$this->DesertN_____Shard->addRecipeForProduce____('Synthetic Power Shard', 'Power Shard',  $amountOf_PowerShard);
+		$this->DesertN_____Shard->addRecipeForProduce2___  ('Time Crystal', 2 * $amountOf_PowerShard);
+		$this->DesertN_____Shard->addRecipeForProduce2___    ('Diamonds', 6.4 * $amountOf_PowerShard);
+		$this->DesertN_____Shard->addRecipeForProduce____      ('Miner Mk.1: Coal', 'Coal', 128 * $amountOf_PowerShard);
+		$this->DesertN_____Shard->addRecipeForProduce2___  ('Dark Matter Crystal', 2.4 * $amountOf_PowerShard);
+		$this->DesertN_____Shard->addRecipeForProduce2___  ('Quartz Crystal', 12 * $amountOf_PowerShard);
+		$this->DesertN_____Shard->addRecipeForProduce____    ('Miner Mk.1: Raw Quartz', 'Raw Quartz', 20 * $amountOf_PowerShard);
+		$this->DesertN_____Shard->addRecipeForProduce2___  ('Excited Photonic Matter', 12000 * $amountOf_PowerShard);
 	}
 
 	private function Marais_____________addRecipesForProduce2__(string $expectedProductDisplayName, float $expectedProductAmount) {
