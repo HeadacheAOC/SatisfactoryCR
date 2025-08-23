@@ -266,6 +266,18 @@ abstract class SToryJsonDocs
 				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableCornerWallLightweight'":
 					
 				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableSnowCannon'";
+				
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildablePoleConveyor'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildablePolePipe'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableRailroadAttachment'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildablePoleStackable'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildablePipeHyperJunction'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableMergerPriority'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableStackableShelf'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableElevatorFloorStop'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableElevator'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableBarrierCorner'";
+				case "/Script/CoreUObject.Class'/Script/FactoryGame.FGBuildableConveyorMonitor'";
 
 					// SKIP
 					break;
