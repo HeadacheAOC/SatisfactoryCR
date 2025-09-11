@@ -169,15 +169,8 @@ class Factory
 			$this->addRecipe______________($ClassName, $amount);
 		}
 	}
-
-	/*
-	 * addRecipeByDisplayName_  addRecipeByDisplayName_
-	 * addRecipeForProduceSome addRecipeForProduceSome
-	 * addRecipeForProduce____     addRecipeForProduce____
-	 * addRecipeForProduce2___    addRecipeForProduce2___
-	 * addRecipeForConsumeSome addRecipeForConsumeSome
-	 * addRecipeForConsume____     addRecipeForConsume____
-	 */
+	
+	
 
 	//////////////////////////////////////////////////////////////////////
 	// Consommation

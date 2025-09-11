@@ -405,7 +405,7 @@ class FGRecipe extends FGElement
 		/* @var $item FGItem */
 		$item = $this->getPrimaryProduct();
 		if (is_null($item)) return '';
-	    return $item->getDisplayName();
+		return $item->getDisplayName();
 	}
 	
 	function getPrimaryProduct(): ?FGItem {
@@ -419,7 +419,7 @@ class FGRecipe extends FGElement
 	 * @param array $items
 	 */
 	function setIngredients(array $items) {
-	    $this->mIngredients = $items;
+		$this->mIngredients = $items;
 	}
 	
 	/**
@@ -427,7 +427,7 @@ class FGRecipe extends FGElement
 	 * @return array
 	 */
 	function getIngredients(): array {
-	    return $this->mIngredients;
+		return $this->mIngredients;
 	}
 	
 	/**
@@ -435,7 +435,7 @@ class FGRecipe extends FGElement
 	 * @param array $items
 	 */
 	function setProducts(array $items) {
-	    $this->mProduct = $items;
+		$this->mProduct = $items;
 	}
 	
 	/**
@@ -443,7 +443,7 @@ class FGRecipe extends FGElement
 	 * @return array
 	 */
 	function getProducts(): array {
-	    return $this->mProduct;
+		return $this->mProduct;
 	}
 	
 	/**
@@ -451,7 +451,7 @@ class FGRecipe extends FGElement
 	 * @param array $buildings
 	 */
 	function setProducedIn(array $buildings) {
-	    $this->mProducedIn = $buildings;
+		$this->mProducedIn = $buildings;
 	}
 	
 	/**
@@ -459,7 +459,7 @@ class FGRecipe extends FGElement
 	 * @return array
 	 */
 	function getProducedIn(): array {
-	    return $this->mProducedIn;
+		return $this->mProducedIn;
 	}
 	
 	/**

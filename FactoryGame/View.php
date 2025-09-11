@@ -42,14 +42,14 @@ abstract class View
 		$triggerSpanClasses = array();
 		if (isset($spanClass)) $triggerSpanClasses[] = $spanClass;
 		//$triggerSpanClasses[] = 'tooltiptrigger';
-    	if (!empty($triggerSpanClasses)) echo ' class="'.implode(' ', $triggerSpanClasses).'"';
+		if (!empty($triggerSpanClasses)) echo ' class="'.implode(' ', $triggerSpanClasses).'"';
 		echo '>';
 		echo htmlspecialchars($element->getDisplayName());
 		echo '</span>';
 		echo '<input type="checkbox">';
 		
 		echo '<div class="tooltiptext">';
-	    echo $element->__toString2(FGElement::TS_HTML_BLOCKTAG);
+		echo $element->__toString2(FGElement::TS_HTML_BLOCKTAG);
 		echo '</div>';
 		
 		echo '</label>';
@@ -88,13 +88,13 @@ abstract class View
 		$triggerSpanClasses = array();
 		if (isset($spanClass)) $triggerSpanClasses[] = $spanClass;
 		$triggerSpanClasses[] = 'tooltiptrigger';
-    	if (!empty($triggerSpanClasses)) echo ' class="'.implode(' ', $triggerSpanClasses).'"';
+		if (!empty($triggerSpanClasses)) echo ' class="'.implode(' ', $triggerSpanClasses).'"';
 		echo '>';
 		echo htmlspecialchars($element->getDisplayName());
 		echo '</span>';
 		
 		echo '<div class="tooltiptext">';
-	    echo $element->__toString2(FGElement::TS_HTML_BLOCKTAG);
+		echo $element->__toString2(FGElement::TS_HTML_BLOCKTAG);
 		echo '</div>';
 
 		echo '</div>';
@@ -104,7 +104,7 @@ abstract class View
 		$all = FGElement::getAll();
 
 		switch ($style) {
-		    
+		
 			case 0:
 			foreach($all as $cat => &$elements) {
 				echo '<h1>', count($elements), ' ', $cat, '</h1><ul>';
@@ -176,12 +176,12 @@ abstract class View
 					} else {
 					$element = next($all[$cat]);
 					}
-					echo '<td>';
+					echo "\n", '<td>';
 					if (false !== $element) View::echoFGElement($element);
 					echo '</td>';
 
 				}
-				echo '</tr>';
+				echo "\n", '</tr>';
 			}
 			echo '</table>';
 
