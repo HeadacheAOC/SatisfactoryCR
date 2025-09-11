@@ -1,5 +1,5 @@
 <?php
-namespace FactoryGame;
+namespace Kemenyende\FactoryGame;
 
 abstract class View
 {
