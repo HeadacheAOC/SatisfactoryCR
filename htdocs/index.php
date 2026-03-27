@@ -1,5 +1,5 @@
 <?php
-namespace Kemenyende;
+namespace Kemenyende\FactoryGame\htdocs;
 
 // Load - Settings
 $settings = parse_ini_file('../settings.ini', true);
@@ -25,32 +25,33 @@ spl_autoload_register(function ($class_name) {
 \Kemenyende\FactoryGame\SToryJsonDocs::parseJsonFile($FGDir, $FGLng);
 \Kemenyende\FactoryGame\Pattern::initialize();
 
-
-// ROOTER
+// HTML
+include('header.php');
 $path = explode('/', $_SERVER['PATH_INFO']); // ["PATH_INFO"]=>string(20) "/php/phpinfo/"
-if ('' !== reset($path)) return; // Requete incorrecte
 
-$lib = next($path);
-if (empty($lib)) return; // Requete incorrecte
-
-$func = next($path);
-
-
-// HTML: Header
-readfile('header.default.html');
-
-if ('php' == $lib) {
+if ('' !== reset($path)) {
+	http_response_code(400);
+} elseif (empty($lib = next($path))) {
+	http_response_code(400);
+} elseif (empty($func = next($path))) {
+	http_response_code(400);
+} elseif ('php' == $lib) {
 	if ('phpinfo' == $func) {
 		phpinfo();
+	} else {
+		http_response_code(400);
 	}
 } elseif ('FGElement' == $lib) {
 	if ('show-all' == $func) {
 		\Kemenyende\FactoryGame\View::showAllElements();
+	} else {
+		http_response_code(400);
 	}
 } elseif ('CustomScript' == $lib) {
 	if ('require_once' == $func) {
-		$script = next($path);
-		if (empty($script)) $script = $_REQUEST['script'] ?? null;
+		
+		if (empty($script = next($path))) $script = $_REQUEST['script'] ?? null;
+		
 		if (!is_string($script)) $script = null;
 
 		$files = scandir("../CustomScript");
@@ -69,8 +70,11 @@ if ('php' == $lib) {
 
 		}
 		if (!isset($script)) echo '</select></form>';
+	} else {
+		http_response_code(400);
 	}
+} else {
+	http_response_code(400);
 }
 
-readfile('footer.default.html');
-?>
+readfile('footer.html');
